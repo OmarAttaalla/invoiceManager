@@ -14,7 +14,7 @@ projects = {}
 
 project_column = sg.Column(
     [
-        [sg.Text('Projects')], [sg.Button("+", key="addProject")], [sg.Listbox(values=projectNames, size=(15,20), key="Project", enable_events=True)]
+        [sg.Text('Projects')], [sg.Button("+", key="addProject", size=(2,1)), sg.InputText("", size=(12,5), key="searchProject", enable_events=True)], [sg.Listbox(values=projectNames, size=(15,20), key="Project", enable_events=True)]
     ]
 )
 
@@ -101,11 +101,24 @@ def addProject(): #Opens window to add a new project
                 break
     newWindow.close()
 
+def filterProjects(text):
+    filtered_projects = []
+    for name in projectNames:
+        if name.lower().find(text.lower()) != -1:
+            filtered_projects.append(name)
+        elif projects[name].date.lower().find(text.lower()) != -1:
+            filtered_projects.append(name)
+        elif projects[name].address.lower().find(text.lower()) != -1:
+            filtered_projects.append(name)
+    return filtered_projects
+
 
 if os.path.exists("Projects.json"):
     f = open("Projects.json")
     data = json.load(f)
     projects = JSON_DECODE_PROJECTS(data)
+
+searchText = "" #Used to filter Projects
 
 while True:
     event, values = window.read()
@@ -125,4 +138,9 @@ while True:
             window["projectRemainingBalance"].update(text_color="green")
     if event == "addProject":
         addProject()
+    if values["searchProject"] != searchText:
+        searchText = values["searchProject"]
+        window["Project"].update(values=filterProjects(searchText))
+
+    
 window.close()
